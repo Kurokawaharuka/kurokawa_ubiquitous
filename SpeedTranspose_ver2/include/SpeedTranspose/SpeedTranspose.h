@@ -10,6 +10,9 @@
 #ifndef SPEEDTRANSPOSE_H
 #define SPEEDTRANSPOSE_H
 
+//デバッグ出力
+constexpr auto DEBUG = 1;
+
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
@@ -254,6 +257,9 @@ class SpeedTranspose
   // </rtc-template>
 
  private:
+	 double power1;
+	 double power2;
+	 double speed;
   // <rtc-template block="private_attribute">
   
   // </rtc-template>

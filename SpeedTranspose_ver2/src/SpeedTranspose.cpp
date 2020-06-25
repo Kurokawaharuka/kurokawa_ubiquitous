@@ -73,6 +73,8 @@ RTC::ReturnCode_t SpeedTranspose::onInitialize()
 
   // <rtc-template block="bind_config">
   // </rtc-template>
+
+  std::cout << "SpeedTranspose is ready!" << std::endl;
   
   return RTC::RTC_OK;
 }
@@ -101,6 +103,9 @@ RTC::ReturnCode_t SpeedTranspose::onShutdown(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t SpeedTranspose::onActivated(RTC::UniqueId ec_id)
 {
+    power1 = 0;
+    power2 = 0;
+    speed = 0.0;
   return RTC::RTC_OK;
 }
 
@@ -115,17 +120,37 @@ RTC::ReturnCode_t SpeedTranspose::onDeactivated(RTC::UniqueId ec_id)
 
 RTC::ReturnCode_t SpeedTranspose::onExecute(RTC::UniqueId ec_id)
 {
+    //変数初期化
+    power1 = 0;
+    power2 = 0;
+    speed = 0.0;
   
-    if (m_power1In.isNew()) {
+    //両方のArduinoからデータが到着したら
+    if (m_power1In.isNew() && m_power2In.isNew()) {
+        //データ読み込み
         m_power1In.read();
+        power1 = m_power1.data;
+        m_power2In.read();
+        power2 = m_power2.data;
 
-    }
-    if (m_power2In.isNew()) {
-        m_power2In.isNew();
-    }
-    
-        m_speedout.data.vx = (1.5 * (m_power1.data - m_power2.data)) / 100;
+        //スピード計算
+        speed = (1.5 * (power1 - power2)) / 100;
+        m_speedout.data.vx = speed;
+        m_speedout.data.vy = 0;
+        m_speedout.data.va = 0;
+
+        //次のRTC送信
         m_speedoutOut.write();
+
+        //デバッグ用出力
+        if (DEBUG) {
+            std::cout << "power1=" << power1 << " power2=" << power2 << " speed=" << speed << std::endl;
+        }
+    }
+
+    //バッファリセット
+    while (!m_power1In.isEmpty()) m_power1In.read();
+    while (!m_power2In.isEmpty()) m_power2In.read();
 
   return RTC::RTC_OK;
 } 
